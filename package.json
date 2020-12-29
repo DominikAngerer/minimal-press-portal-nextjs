@@ -1,0 +1,21 @@
+{
+  "name": "minimal-press-portal-nextjs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "autoprefixer": "^10.1.0",
+    "axios": "^0.21.1",
+    "next": "10.0.4",
+    "postcss": "^8.2.1",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "storyblok-js-client": "^3.3.0",
+    "storyblok-react": "^0.1.1",
+    "tailwindcss": "^2.0.2"
+  }
+}
