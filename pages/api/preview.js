@@ -17,5 +17,5 @@ export default async (req, res) => {
     }
 
     // redirect to page we actually want to visit with the set cookie
-    res.redirect('/' + slug)
+    res.redirect('/' + slug + '?_storyblok=1&cv='+ Date.now())
   }

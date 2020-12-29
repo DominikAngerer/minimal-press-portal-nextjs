@@ -1,41 +1,46 @@
 import Head from 'next/head'
 
 import StoryblokEditable from '../lib/storyblok-editable'
-
+import StoryblokBridge from '../lib/storyblok-bridge'
 import Storyblok from '../lib/storyblok'
+
 import React, { useEffect } from 'react';
 
 import DynamicComponent from '../components/DynamicComponent'
 
-export default function Home({ story, preview }) {
+export default function DynamicRoute(props) {
 
-    if(preview) {
-        useEffect(() => {
+    let [story, setStory] = useState(props.story)
+
+    useEffect(() => {
+        StoryblokBridge(() => {
             if (window.storyblok) {
-                console.log('init', window.storyblok)
-                window.storyblok.init()
-                
+                window.storyblok.init({
+                    accessToken: 'vJMM43mnqNbmpXmxgBALqAtt'
+                })
+
                 // reload on Next.js page on save or publish event in Storyblok Visual Editor
-                window.storyblok.on(['change', 'published'], () => location.reload(true))
-                
+                window.storyblok.on(['change', 'published'], () => location.reload())
+
                 // Update story in State on input in Visual Editor
                 // this will alter the state and replaces the current story with a current raw story object and resolve relations
                 window.storyblok.on('input', (event) => {
+                    console.log(event, story)
                     if (event.story.content._uid === story.content._uid) {
                         event.story.content = window.storyblok.addComments(event.story.content, event.story.id)
-                        story = event.story
+                        setStory(event.story)
                     }
                 })
             }
         })
-    }
+    })
+    
 
   return (
     <>
         <Head>
             <title>{story.name}</title>
             <link rel="icon" href="/favicon.ico" />
-            {preview ? <script src={'//app.storyblok.com/f/storyblok-latest.js?t=vJMM43mnqNbmpXmxgBALqAtt'}></script> : ''}
         </Head>
 
         <header className="py-10">
@@ -69,9 +74,9 @@ export async function getStaticPaths() {
 
     return {
         paths: paths,
-        fallback: true 
+        fallback: false
     }
-  }
+}
 
 export async function getStaticProps(context) {
     let slug = context.params.slug
@@ -82,11 +87,16 @@ export async function getStaticProps(context) {
         params.version = 'draft'
     }
 
-    console.log(slug)
-
     let { data } = await Storyblok.get('cdn/stories/' + slug, params)
 
-    console.log(data)
+    if (!data) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+    }
 
     return {
         props: { story: data.story, preview: context.preview || false },
