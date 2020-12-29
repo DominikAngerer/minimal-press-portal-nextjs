@@ -3,8 +3,7 @@ import Head from 'next/head'
 import StoryblokEditable from '../lib/storyblok-editable'
 
 import Storyblok from '../lib/storyblok'
-import EditMode from '../lib/storyblok-editmode'
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 import DynamicComponent from '../components/DynamicComponent'
 
@@ -83,9 +82,11 @@ export async function getStaticProps(context) {
         params.version = 'draft'
     }
 
-    
+    console.log(slug)
 
     let { data } = await Storyblok.get('cdn/stories/' + slug, params)
+
+    console.log(data)
 
     return {
         props: { story: data.story, preview: context.preview || false },
