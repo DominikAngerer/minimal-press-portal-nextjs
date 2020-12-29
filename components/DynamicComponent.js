@@ -3,7 +3,7 @@ import NavigationCards from '../components/NavigationCards'
 
 const Components = {
   'hero': Hero,
-  'navigation_cards': NavigationCards
+  'navigation_cards': NavigationCards,
 }
 
 const Placeholder = ({componentName}) => (
