@@ -28,7 +28,7 @@ export default function Home({ story, preview }) {
                     }
                 })
             }
-        }, [])
+        })
     }
 
   return (
@@ -47,7 +47,7 @@ export default function Home({ story, preview }) {
           </div>
         </header>
 
-        <main>
+        <main ref={elem => StoryblokEditable(story.content, elem)}>
           {story.content.body.map((blok) => (
             <DynamicComponent blok={blok} key={blok._uid} />
           ))}
@@ -62,7 +62,9 @@ export async function getStaticPaths() {
     let paths = []
     Object.keys(data.links).forEach(linkKey => {
         if(!data.links[linkKey].is_folder) {
-            paths.push({ params: { slug: data.links[linkKey].slug }})
+            if(data.links[linkKey].slug !== 'home') {
+                paths.push({ params: { slug: data.links[linkKey].slug }})
+            }
         } 
     })
 
@@ -73,16 +75,17 @@ export async function getStaticPaths() {
   }
 
 export async function getStaticProps(context) {
-    console.log('Page Context', context)
+    let slug = context.params.slug
     let params = {
-        // version: 'published'
         version: 'draft'
     }
     if(context.preview) {
         params.version = 'draft'
     }
 
-    let { data } = await Storyblok.get('cdn/stories/' + context.params.slug, params)
+    
+
+    let { data } = await Storyblok.get('cdn/stories/' + slug, params)
 
     return {
         props: { story: data.story, preview: context.preview || false },

@@ -1,23 +1,44 @@
 import Head from 'next/head'
-import SbEditable from 'storyblok-react'
+
+import StoryblokEditable from '../lib/storyblok-editable'
 
 import Storyblok from '../lib/storyblok'
 import EditMode from '../lib/storyblok-editmode'
+import React, { useState, useEffect } from 'react';
 
 import DynamicComponent from '../components/DynamicComponent'
 
 export default function Home({ story, preview }) {
-  preview ? EditMode(): false;
+
+    if(preview) {
+        useEffect(() => {
+            if (window.storyblok) {
+                console.log('init', window.storyblok)
+                window.storyblok.init()
+                
+                // reload on Next.js page on save or publish event in Storyblok Visual Editor
+                window.storyblok.on(['change', 'published'], () => location.reload(true))
+                
+                // Update story in State on input in Visual Editor
+                // this will alter the state and replaces the current story with a current raw story object and resolve relations
+                window.storyblok.on('input', (event) => {
+                    if (event.story.content._uid === story.content._uid) {
+                        event.story.content = window.storyblok.addComments(event.story.content, event.story.id)
+                        story = event.story
+                    }
+                })
+            }
+        })
+    }
 
   return (
     <>
-      <Head>
-        <title>{story.name}</title>
-        <link rel="icon" href="/favicon.ico" />
-        {preview ? <script src={'//app.storyblok.com/f/storyblok-latest.js?t=vJMM43mnqNbmpXmxgBALqAtt'}></script> : ''}
-      </Head>
+        <Head>
+            <title>{story.name}</title>
+            <link rel="icon" href="/favicon.ico" />
+            {preview ? <script src={'//app.storyblok.com/f/storyblok-latest.js?t=vJMM43mnqNbmpXmxgBALqAtt'}></script> : ''}
+        </Head>
 
-      <SbEditable content={story.content}>
         <header className="py-10">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl font-bold text-secondary">
@@ -25,31 +46,30 @@ export default function Home({ story, preview }) {
             </h1>
           </div>
         </header>
-      </SbEditable>
 
-      <SbEditable content={story.content}>
-        <main>
+        <main ref={elem => StoryblokEditable(story.content, elem)}>
           {story.content.body.map((blok) => (
             <DynamicComponent blok={blok} key={blok._uid} />
           ))}
         </main>
-      </SbEditable>
     </>
   )
 }
 
 export async function getStaticProps(context) {
-  let params = {
-    // version: 'published'
-    version: 'draft'
-  }
-  if(context.preview) {
-    params.version = 'draft'
-  }
+    let slug = 'home'
+    let params = {
+        version: 'draft'
+    }
 
-  let { data } = await Storyblok.get('cdn/stories/home', params)
+    if(context.preview) {
+        params.version = 'draft'
+    }
 
-  return {
-    props: { story: data.story, preview: context.preview || false },
-  }
+
+    let { data } = await Storyblok.get('cdn/stories/' + slug, params)
+
+    return {
+        props: { story: data.story, preview: context.preview || false },
+    }
 }
