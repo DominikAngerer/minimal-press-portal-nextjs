@@ -2,7 +2,7 @@ import StoryblokEditable from '../lib/storyblok-editable'
 
 export default function Hero({ blok }) {
     return (
-        <section className="text-center mb-32" ref={elem => StoryblokEditable(blok, elem)}>
+        <section className="text-center mb-32" {...StoryblokEditable(blok)}>
             <h2 className="text-4xl font-extrabold text-secondary sm:text-5xl md:text-6xl">
                 {blok.headline}
             </h2>
