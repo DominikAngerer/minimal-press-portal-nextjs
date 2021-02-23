@@ -25,7 +25,7 @@ export default function DynamicRoute(props) {
                 </div>
             </header>
 
-            <main ref={elem => StoryblokEditable(story.content, elem)}>
+            <main {...StoryblokEditable(blok)}>
                 {story.content.body.map((blok) => (
                     <DynamicComponent blok={blok} key={blok._uid} />
                 ))}
